@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-api-v2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: info-api
+      release: v2
+  template:
+    metadata:
+      labels:
+        app: info-api
+        release: v2
+    spec:
+      containers:
+      - name: info-api
+        image: info-api:v2
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        env:
+        - name: RELEASE
+          value: "v2"

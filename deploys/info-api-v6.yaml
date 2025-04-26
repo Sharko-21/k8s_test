@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-api-v6
+  labels:
+    app: info-api
+    release: v6
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: info-api
+      release: v6
+  template:
+    metadata:
+      labels:
+        app: info-api
+        release: v6
+    spec:
+      containers:
+      - name: info-api
+        image: info-api:v6
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        env:
+        - name: RELEASE
+          value: "v6"

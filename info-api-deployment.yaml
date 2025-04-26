@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: info-api-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: info-api
+  template:
+    metadata:
+      labels:
+        app: info-api
+    spec:
+      containers:
+      - name: info-api
+        image: info-api:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: DEPLOYMENT_NAME
+          value: "info-api-deployment"
+        - name: SERVICE_NAME
+          value: "info-api-service"
+        - name: CLUSTER_NAME
+          value: "kind-cluster"  # или передать как нужно
