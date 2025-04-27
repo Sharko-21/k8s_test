@@ -1,0 +1,57 @@
+stages:
+  - init
+  - release
+  - switch
+  - finalize
+
+create-service:
+  stage: init
+  tags:
+    - shell
+  script:
+    - echo "🔎 Checking if Service 'info-api-service' exists..."
+    - |
+      if kubectl get svc info-api-service > /dev/null 2>&1; then
+        echo "✅ Service already exists, nothing to do."
+      else
+        echo "🚀 Service not found, creating..."
+        kubectl apply -f info-api-service.yaml
+      fi
+
+build-release:
+  stage: release
+  tags:
+    - shell
+  script:
+    - chmod +x release.sh
+    - VERSION="v$(date +%s)"
+    - echo $VERSION > release_version.txt
+    - ./release.sh $VERSION
+  artifacts:
+    paths:
+      - release_version.txt
+      - deploys/
+    expire_in: 1 day
+
+switch-traffic:
+  stage: switch
+  tags:
+    - shell
+  when: manual
+  dependencies:
+    - build-release
+  script:
+    - chmod +x switch.sh
+    - export VERSION=$(cat release_version.txt)
+    - ./switch.sh $VERSION
+
+finalize-release:
+  stage: finalize
+  tags:
+    - shell
+  when: manual
+  dependencies:
+    - switch-traffic
+  script:
+    - chmod +x finalize.sh
+    - ./finalize.sh

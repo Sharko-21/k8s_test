@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-CURRENT=$(cat active-release.txt)
+CURRENT=$(kubectl get svc info-api-service -o jsonpath="{.spec.selector.release}")
 ACTIVE_DEPLOYMENT="info-api-$CURRENT"
 
 echo "ℹ️ Active release (from file): $CURRENT"
@@ -30,16 +30,6 @@ for d in $DEPLOYS; do
   if [ "$REL_NUM" -lt "$CURRENT_NUM" ]; then
     echo "✅ Deleting old deployment: $d"
     kubectl delete deployment $d
-    OLD_FOUND=1
-  fi
-done
-
-for p in $PODS; do
-  REL=$(kubectl get pod $p -o jsonpath="{.metadata.labels.release}")
-  REL_NUM=${REL#v}
-  if [ "$REL_NUM" -lt "$CURRENT_NUM" ]; then
-    echo "✅ Deleting old pod: $p"
-    kubectl delete pod $p || true
     OLD_FOUND=1
   fi
 done

@@ -165,6 +165,50 @@ kubectl apply -f info-api-service.yaml
 
 ---
 
+## Gitlab pipeline
+
+**ℹ️ Этот проект использует полностью автоматизированный пайплайн CI/CD для управления релизами FastAPI-приложения в Kubernetes с помощью GitLab Runner (Shell Executor) и Kind-кластера.**
+
+**ℹ️ [Если хотите узнать про локальную установку Gitlab и Gitlab Runner](https://github.com/Sharko-21/local-gitlab-installation)**
+---
+
+## 📈 Структура пайплайна
+
+```text
+┌───────────────────────┐
+│      create-service   │
+│ (проверка и создание   │
+│    Kubernetes Service)│
+└──────────┬────────────┘
+           ▼
+┌───────────────────────┐
+│      build-release    │
+│ (сборка образа,        │
+│ генерация deploy YAML) │
+│ - artifacts: release_version.txt, deploys/ │
+└──────────┬────────────┘
+           ▼
+┌───────────────────────┐
+│     switch-traffic    │
+│ (обновление сервиса на│
+│   новый релиз)         │
+│ - artifacts: active-release.txt │
+└──────────┬────────────┘
+           ▼
+┌───────────────────────┐
+│     finalize-release  │
+│ (удаление старых       │
+│ deployment-ов и pod-ов)│
+└───────────────────────┘
+```
+---
+
+### 📂 Где искать сгенерированные YAML-файлы?
+
+- После выполнения стадии build-release, сгенерированные файлы сохраняются в артефактах пайплайна (deploys/).
+- Их можно скачать в GitLab UI через кнопку Download Artifacts.
+- Файлы имеют вид: deploys/info-api-<release>.yaml.
+
 ## 📜 Лицензия
 
 Свободно используйте и модифицируйте проект для любых целей.
